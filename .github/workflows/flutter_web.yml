@@ -13,19 +13,20 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: 'stable'
-
-    - name: Enable web
-      run: flutter config --enable-web
-
     - name: Install dependencies
-      run: flutter pub get
+      run: sudo apt-get update && sudo apt-get install -y git wget unzip xz-utils curl
 
-    - name: Build web
-      run: flutter build web --release
+    - name: Setup Flutter
+      run: |
+        if [ ! -d "./flutter" ]; then
+          git clone https://github.com/flutter/flutter.git -b stable
+        fi
+        ./flutter/bin/flutter --version
+        ./flutter/bin/flutter config --enable-web
+        ./flutter/bin/flutter pub get
+
+    - name: Build web using script
+      run: ./run_flutter.sh
 
     - name: Copy web build to docs
       run: |
