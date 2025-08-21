@@ -1,0 +1,41 @@
+name: Build & Deploy Flutter Web to main/docs
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: 'stable'
+
+    - name: Enable web
+      run: flutter config --enable-web
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Build web
+      run: flutter build web --release
+
+    - name: Copy web build to docs
+      run: |
+        rm -rf docs
+        cp -r build/web docs
+
+    - name: Commit and push to main
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+        git add docs
+        git commit -m "Deploy Flutter web to docs [ci skip]" || echo "No changes to commit"
+        git push
